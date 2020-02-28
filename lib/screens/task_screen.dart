@@ -20,6 +20,31 @@ class TaskScreen extends StatefulWidget{
 }
 
 class _TaskScreenState extends State<TaskScreen>{
+  String qrCode = "";
+
+  Future scanQR() async{
+    try{
+        String qr = await BarcodeScanner.scan();
+        setState(() {
+          this.qrCode = qr;
+        });
+    }
+    on PlatformException catch(e){
+      if(e.code == BarcodeScanner.CameraAccessDenied){
+        setState(() => this.qrCode = "Camera permission not granted");
+      }
+      else{
+        setState(() => this.qrCode = "Unknown error");
+      }
+    }
+    on FormatException{
+      setState(() => this.qrCode = "null");
+    }
+    catch(e){
+      setState(() => this.qrCode = "Unknown error");
+    }
+  }
+
   Future<bool>_onWillPop(){
     return showDialog(context: context, 
       builder: (context) => new AlertDialog(
@@ -88,16 +113,54 @@ class _TaskScreenState extends State<TaskScreen>{
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20))
               ),
               padding: EdgeInsets.all(20),
-              child: Text(widget.task.description, style: TextStyle(fontSize: 16),),
+              child: Column(
+                children: <Widget>[
+                  Text(widget.task.description, style: TextStyle(fontSize: 16),),
+                  TextField(),
+                  MaterialButton(
+                    onPressed: scanQR,
+                    shape: CircleBorder(),
+                    color: widget.task.category.color,
+                    child: Icon(Icons.camera_alt),
+                    padding: EdgeInsets.all(10),
+                  )
+                ],
+              ),
             ),
-            RaisedButton(
-              child: Text("xddd"),
-              onPressed: () {},
-              //onPressed: scanQR
-            )
           ],
         ),
-      )
+      ),
+      /*floatingActionButton: FloatingActionButton(
+        onPressed: null,
+        backgroundColor: widget.task.category.color,
+        child: Icon(Icons.check),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        color: Colors.red, 
+        notchMargin: 4,
+        clipBehavior: Clip.antiAlias,
+        child: BottomNavigationBar(items: [
+          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), title: Text("Scan QR")),
+          BottomNavigationBarItem(icon: Icon(Icons.assignment), title: Text("Answer")),
+          //BottomNavigationBarItem(icon: Icon(Icons.check), title: Text("Submit")),
+        ],)
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,*/
+
+      
     ));
   }
 }
+
+/*RaisedButton(
+              child: Text("Scan QR"),
+              onPressed: scanQR,
+            ),
+            RaisedButton(
+              //child: Text
+              onPressed: (){},
+            ),
+            RaisedButton(
+              child: Text("Submit"),
+              onPressed: () {},) */
