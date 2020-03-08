@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:flutter/material.dart';
 import 'package:skis_campus_game/models/singletask.dart';
 import 'package:skis_campus_game/server_addr.dart';
 import 'package:skis_campus_game/themes/mytheme.dart';
+import 'package:skis_campus_game/websocket_helper.dart';
 
 class TaskScreen extends StatefulWidget{
   final SingleTask task;
@@ -22,7 +22,7 @@ class TaskScreen extends StatefulWidget{
 class _TaskScreenState extends State<TaskScreen>{
   String qrCode = "";
 
-  Future scanQR() async{
+  Future _scanQR() async{
     try{
         String qr = await BarcodeScanner.scan();
         setState(() {
@@ -43,6 +43,10 @@ class _TaskScreenState extends State<TaskScreen>{
     catch(e){
       setState(() => this.qrCode = "Unknown error");
     }
+  }
+
+  bool _verifyAnswer(){
+    return true;
   }
 
   Future<bool>_onWillPop(){
@@ -75,8 +79,6 @@ class _TaskScreenState extends State<TaskScreen>{
               else{
 
               }
-              
-              //replace with named route!!!!!!!
             },
             child: Text("YES"),
           ),
@@ -117,50 +119,26 @@ class _TaskScreenState extends State<TaskScreen>{
                 children: <Widget>[
                   Text(widget.task.description, style: TextStyle(fontSize: 16),),
                   TextField(),
-                  MaterialButton(
-                    onPressed: scanQR,
-                    shape: CircleBorder(),
-                    color: widget.task.category.color,
-                    child: Icon(Icons.camera_alt),
-                    padding: EdgeInsets.all(10),
-                  )
                 ],
               ),
             ),
           ],
         ),
       ),
-      /*floatingActionButton: FloatingActionButton(
-        onPressed: null,
+      bottomNavigationBar: Container(
+        height: 52,
+        margin: EdgeInsets.all(0),
+        child: RaisedButton(
+          onPressed: _verifyAnswer,
+          color: widget.task.category.color,
+          child: Text("SUBMIT"),
+          )
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _scanQR,
         backgroundColor: widget.task.category.color,
-        child: Icon(Icons.check),
+        child: Image.asset('assets/images/qr_code.png', height: 33,), 
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        color: Colors.red, 
-        notchMargin: 4,
-        clipBehavior: Clip.antiAlias,
-        child: BottomNavigationBar(items: [
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), title: Text("Scan QR")),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), title: Text("Answer")),
-          //BottomNavigationBarItem(icon: Icon(Icons.check), title: Text("Submit")),
-        ],)
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,*/
-
-      
     ));
   }
 }
-
-/*RaisedButton(
-              child: Text("Scan QR"),
-              onPressed: scanQR,
-            ),
-            RaisedButton(
-              //child: Text
-              onPressed: (){},
-            ),
-            RaisedButton(
-              child: Text("Submit"),
-              onPressed: () {},) */

@@ -4,7 +4,7 @@ class SingleTask{
   final String name;
   final String description;
   final int points;
-  final bool available;
+  bool available;
   final Category category;
 
   SingleTask({
