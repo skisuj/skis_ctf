@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:skis_campus_game/models/singletask.dart';
 import 'package:skis_campus_game/server_addr.dart';
 import 'package:skis_campus_game/themes/mytheme.dart';
-import 'package:skis_campus_game/websocket_helper.dart';
 
 class TaskScreen extends StatefulWidget{
   final SingleTask task;
@@ -52,8 +52,14 @@ class _TaskScreenState extends State<TaskScreen>{
   Future<bool>_onWillPop(){
     return showDialog(context: context, 
       builder: (context) => new AlertDialog(
-        content: new Text('Do you want to exit an App'),
+        content: new Text('Do you want to abort this task?'),
         actions: <Widget>[
+          FlatButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text("No"),
+          ),
           FlatButton(
             onPressed: () async {
               var url = URLaddr.serverAddr + URLaddr.cancelTask;
@@ -80,13 +86,7 @@ class _TaskScreenState extends State<TaskScreen>{
 
               }
             },
-            child: Text("YES"),
-          ),
-          FlatButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text("NOPE"),
+            child: Text("Yes"),
           ),
         ],
         )
@@ -104,8 +104,14 @@ class _TaskScreenState extends State<TaskScreen>{
         child: Column(
           children: <Widget>[
             Container(
+              height: 100,
               width: MediaQuery.of(context).size.width,
-              child: Image.asset('assets/images/categories/tmp/resistor.png', height: 100), 
+              child: Container(
+                child: CachedNetworkImage(
+                imageUrl: URLaddr.s3path + widget.task.path,
+              ),
+              padding: EdgeInsets.all(15),
+              ),
               color: widget.task.category.color
             ),
             Container(

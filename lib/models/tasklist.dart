@@ -1,3 +1,4 @@
+import 'package:skis_campus_game/category.dart';
 import 'package:skis_campus_game/models/singletask.dart';
 
 class TaskList{
@@ -7,9 +8,8 @@ class TaskList{
     this.tasklist
   });
 
-  factory TaskList.fromJson(Map<String, dynamic> json){
-    var items = json["Items"];
-    List<SingleTask> tasklist = List<SingleTask>.from(items.map((i) => SingleTask.fromJson(i)));
+  factory TaskList.fromJson(List<dynamic> items, Category category){
+    List<SingleTask> tasklist = List<SingleTask>.from(items.map((i) => SingleTask.fromJson(i, category)));
 
     return new TaskList(
       tasklist: tasklist

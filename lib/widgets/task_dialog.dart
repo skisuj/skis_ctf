@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:skis_campus_game/models/singletask.dart';
@@ -6,18 +7,18 @@ import 'package:skis_campus_game/screens/task_screen.dart';
 import 'package:skis_campus_game/server_addr.dart';
 import 'package:skis_campus_game/themes/mytheme.dart';
 
+String tmpPath;
+
 class TaskDialog extends StatelessWidget{
   final SingleTask task;
-
-  TaskDialog({Key key, @required this.task}) : super(key: key);
-
   final double radius = 20;
 
+  TaskDialog({Key key, @required this.task}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-      //borderRadius: BorderRadius.only(topLeft:  Radius.circular(radius), topRight:  Radius.circular(radius))),
       borderRadius: BorderRadius.all(Radius.circular(radius),)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -30,7 +31,10 @@ class TaskDialog extends StatelessWidget{
             BorderRadius.only(topLeft: Radius.circular(radius), topRight: Radius.circular(radius)),
             color: task.category.color),
             child: Column(children: <Widget>[
-              Image.asset('assets/images/categories/tmp/resistor.png', width: 100,),
+              CachedNetworkImage(
+                imageUrl: URLaddr.s3path + task.path,
+                width: 100,
+              ),
               Text(task.name)
             ],),
           ),

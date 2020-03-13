@@ -1,12 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:skis_campus_game/category.dart';
-import 'package:skis_campus_game/models/sockets/cat_socket.dart';
 import 'package:skis_campus_game/models/tasklist.dart';
 import 'package:skis_campus_game/server_addr.dart';
 import 'package:skis_campus_game/themes/mytheme.dart';
 import 'package:skis_campus_game/widgets/task_dialog.dart';
 import 'package:http/http.dart' as http;
+import 'package:async/async.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChooseTaskScreen extends StatefulWidget{
   final Category category;
@@ -18,14 +20,9 @@ class ChooseTaskScreen extends StatefulWidget{
 }
 
 class _ChooseTaskScreenState extends State<ChooseTaskScreen> {
-  //CatSocket socket;
   TaskList tasks;
-
-  @override
-  void initState(){
-    super.initState();
-    //socket = CatSocket(this.callback);
-  }
+  final AsyncMemoizer<TaskList> _memoizer = AsyncMemoizer<TaskList>();
+  //tasks bedzie updatowane przez websocket
 
   void callback(String name, bool av){
     setState(() {
@@ -34,20 +31,20 @@ class _ChooseTaskScreenState extends State<ChooseTaskScreen> {
   }
 
   Future<TaskList> fetchTasks() async {
-    String url = URLaddr.serverAddr + URLaddr.getTasks + this.widget.category.name.toLowerCase();
-    print(url);
-    final res = await http.get(url);
-    if (res.statusCode == 200) {
-      if(mounted)
-      {
-        setState(() {
-          tasks = TaskList.fromJson(json.decode(res.body));
-        });
+    return this._memoizer.runOnce(
+      () async {
+        String url = URLaddr.serverAddr + URLaddr.getTasks + this.widget.category.name.toLowerCase();
+        print(url);
+        final res = await http.get(url);
+        if (res.statusCode == 200) {
+          var data = (json.decode(res.body))['Items'][0];
+          tasks = TaskList.fromJson(data['tasks'], widget.category);
+          
+          return tasks;
+        }
+        return null;
       }
-      return tasks;
-    }
-
-    return null;
+    );
   }
 
   @override
@@ -55,7 +52,6 @@ class _ChooseTaskScreenState extends State<ChooseTaskScreen> {
     return FutureBuilder<TaskList>(
         future: fetchTasks(),
         builder: (context, AsyncSnapshot<TaskList> snapshot){
-          print("snap:");
           print(snapshot);
           if(snapshot.hasData){
             return Scaffold(
